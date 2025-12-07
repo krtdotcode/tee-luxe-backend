@@ -63,8 +63,9 @@ class OrderController extends Controller
             // Generate unique order number
             $orderNumber = 'ORD-' . now()->format('YmdHis') . '-' . str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
 
-            // Determine payment status
-            $paymentStatus = $validated['payment_method'] === 'cod' ? 'pending' : 'paid';
+            // For now, both COD and wallet result in pending payment
+            // Future: wallet can be marked as paid, COD remains pending until delivery
+            $paymentStatus = $validated['payment_method'] === 'wallet' ? 'paid' : 'pending';
 
             // Create order
             $order = Order::create([
