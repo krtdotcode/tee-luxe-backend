@@ -14,9 +14,7 @@ Route::apiResource('products', \App\Http\Controllers\ProductController::class)->
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (\Illuminate\Http\Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', [\App\Http\Controllers\AuthController::class, 'user']);
     Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
 
     Route::apiResource('cart', \App\Http\Controllers\CartController::class);
