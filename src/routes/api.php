@@ -20,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
 
     Route::apiResource('cart', \App\Http\Controllers\CartController::class);
+    Route::apiResource('orders', \App\Http\Controllers\OrderController::class)->only(['index', 'store', 'show']);
 });
 
 ?>
