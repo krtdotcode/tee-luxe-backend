@@ -33,6 +33,11 @@ class ProductController extends Controller
             });
         }
 
+        // Add limit for performance optimization (default no limit for backward compatibility)
+        if ($request->has('limit') && is_numeric($request->limit)) {
+            $query->limit((int)$request->limit);
+        }
+
         $products = $query->get();
 
         return response()->json($products);
