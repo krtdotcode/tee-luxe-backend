@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->decimal('wallet_balance', 10, 2)->default(500.00); // Give new users ₱500 balance
             $table->rememberToken();
             $table->timestamps();
         });
