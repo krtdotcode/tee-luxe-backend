@@ -15,7 +15,12 @@ class ProductController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Product::with('category')->where('is_active', true)->where('stock_quantity', '>', 0);
+        $query = Product::with('category');
+
+        // For admin users, show all products; for public, show only active products with stock
+        if (!auth('sanctum')->check() || !auth('sanctum')->user()->is_admin) {
+            $query->where('is_active', true)->where('stock_quantity', '>', 0);
+        }
 
         // Filter by category
         if ($request->has('category') && $request->category !== 'All') {
@@ -48,19 +53,42 @@ class ProductController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|string|max:500',
-            'stock_quantity' => 'nullable|integer|min:0',
-            'is_active' => 'boolean'
-        ]);
+        try {
+            $validated = $request->validate([
+                'category_id' => 'required|exists:categories,id',
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'required|numeric|min:0',
+                'image' => 'nullable|string|max:500',
+                'stock_quantity' => 'nullable|integer|min:0',
+                'is_active' => 'boolean'
+            ]);
 
-        $product = Product::create($validated);
+            $validated['stock_quantity'] = $validated['stock_quantity'] ?? 0;
 
-        return response()->json($product->load('category'), 201);
+            $product = Product::create($validated);
+
+            if ($product) {
+                return response()->json($product->load('category'), 201);
+            } else {
+                return response()->json(['message' => 'Failed to create product'], 500);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Product creation failed: ' . $e->getMessage(), [
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to create product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -76,19 +104,45 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product): JsonResponse
     {
-        $validated = $request->validate([
-            'category_id' => 'sometimes|exists:categories,id',
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'sometimes|numeric|min:0',
-            'image' => 'nullable|string|max:500',
-            'stock_quantity' => 'nullable|integer|min:0',
-            'is_active' => 'boolean'
-        ]);
+        try {
+            $validated = $request->validate([
+                'category_id' => 'sometimes|exists:categories,id',
+                'name' => 'sometimes|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'sometimes|numeric|min:0',
+                'image' => 'nullable|string|max:500',
+                'stock_quantity' => 'nullable|integer|min:0',
+                'is_active' => 'boolean'
+            ]);
 
-        $product->update($validated);
+            if (isset($validated['stock_quantity'])) {
+                $validated['stock_quantity'] = $validated['stock_quantity'] ?? 0;
+            }
 
-        return response()->json($product->load('category'));
+            $updated = $product->update($validated);
+
+            if ($updated) {
+                return response()->json($product->load('category'));
+            } else {
+                return response()->json(['message' => 'Failed to update product'], 500);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Product update failed: ' . $e->getMessage(), [
+                'product_id' => $product->id,
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to update product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -96,8 +150,25 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): JsonResponse
     {
-        $product->delete();
+        try {
+            $deleted = $product->delete();
 
-        return response()->json(['message' => 'Product deleted successfully']);
+            if ($deleted) {
+                return response()->json(['message' => 'Product deleted successfully']);
+            } else {
+                return response()->json(['message' => 'Failed to delete product'], 500);
+            }
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Product deletion failed: ' . $e->getMessage(), [
+                'product_id' => $product->id,
+                'product_name' => $product->name
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to delete product',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
