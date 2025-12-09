@@ -103,7 +103,7 @@
                     <a class="nav-link sidebar-link py-3 {{ request()->is('admin/dashboard*') ? 'active' : '' }}" href="{{ route('admin.dashboard.view') }}">
                         <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                     </a>
-                    <a class="nav-link sidebar-link py-3 {{ request()->is('admin/products*') ? 'active' : '' }}" href="{{ route('admin.admin.products.index') }}">
+                    <a class="nav-link sidebar-link py-3 {{ request()->is('admin/products*') ? 'active' : '' }}" href="{{ route('admin.products.index') }}">
                         <i class="fas fa-box me-2"></i> Products
                     </a>
                     <a class="nav-link sidebar-link py-3 {{ request()->is('admin/orders*') ? 'active' : '' }}" href="#" onclick="alert('Orders management coming soon')">

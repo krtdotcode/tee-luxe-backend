@@ -15,12 +15,12 @@ class ProductController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Product::with('category')->where('is_active', true);
+        $query = Product::with('category')->where('is_active', true)->where('stock_quantity', '>', 0);
 
         // Filter by category
         if ($request->has('category') && $request->category !== 'All') {
             $query->whereHas('category', function ($q) use ($request) {
-                $q->where('name', $request->category);
+                $q->whereRaw('LOWER(name) = ?', [strtolower($request->category)]);
             });
         }
 
@@ -33,12 +33,12 @@ class ProductController extends Controller
             });
         }
 
-        // Add limit for performance optimization (default no limit for backward compatibility)
+        // Pagination or limit for performance
         if ($request->has('limit') && is_numeric($request->limit)) {
-            $query->limit((int)$request->limit);
+            $products = $query->paginate((int)$request->limit);
+        } else {
+            $products = $query->paginate(20); // Default pagination
         }
-
-        $products = $query->get();
 
         return response()->json($products);
     }

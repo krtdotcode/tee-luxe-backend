@@ -10,13 +10,15 @@ Route::post('login', [\App\Http\Controllers\AuthController::class, 'login']);
 
 // Public routes
 Route::apiResource('categories', \App\Http\Controllers\CategoryController::class)->only(['index', 'show']);
-Route::apiResource('products', \App\Http\Controllers\ProductController::class)->only(['index', 'show']);
+Route::get('products', [\App\Http\Controllers\ProductController::class, 'index']);
+Route::get('products/{product}', [\App\Http\Controllers\ProductController::class, 'show']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [\App\Http\Controllers\AuthController::class, 'user']);
     Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
 
+    Route::apiResource('products', \App\Http\Controllers\ProductController::class)->except(['index', 'show']);
     Route::apiResource('cart', \App\Http\Controllers\CartController::class);
     Route::apiResource('orders', \App\Http\Controllers\OrderController::class)->only(['index', 'store', 'show']);
 });

@@ -135,13 +135,13 @@
                 <h5 class="fw-bold text-dark mb-4">Quick Actions</h5>
                 <div class="row g-3 justify-content-center">
                     <div class="col-auto">
-                        <a href="{{ route('admin.admin.products.create') }}" class="btn btn-dark btn-admin px-4">
+                        <a href="{{ route('admin.products.create') }}" class="btn btn-dark btn-admin px-4">
                             <i class="fas fa-plus me-2"></i>
                             Add Product
                         </a>
                     </div>
                     <div class="col-auto">
-                        <a href="{{ route('admin.admin.products.index') }}" class="btn btn-outline-dark btn-admin px-4">
+                        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-dark btn-admin px-4">
                             <i class="fas fa-list me-2"></i>
                             View Products
                         </a>
